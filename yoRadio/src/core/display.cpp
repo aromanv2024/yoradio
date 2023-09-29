@@ -132,12 +132,19 @@ void Display::_buildPager(){
   #ifndef HIDE_WEATHER
     _weather = new ScrollWidget("\007", weatherConf, config.theme.weather, config.theme.background);
   #endif
-  
+  #if BATTERY_PIN!=255 && defined(SHOW_BATTERY)
+    _battery = new BatteryWidget(battConf, config.theme.batteryhigh, config.theme.batterymid, config.theme.batterylow, config.theme.background);
+  #endif
   if(_volbar)   _footer.addWidget( _volbar);
   if(_voltxt)   _footer.addWidget( _voltxt);
   if(_volip)    _footer.addWidget( _volip);
   if(_rssi)     _footer.addWidget( _rssi);
   if(_heapbar)  _footer.addWidget( _heapbar);
+  #if BATTERY_PIN!=255 && defined(SHOW_BATTERY)
+    _battery = new BatteryWidget(battConf, config.theme.batteryhigh, config.theme.batterymid, config.theme.batterylow, config.theme.background);
+    if(_battery)  _footer.addWidget(_battery);
+  #endif
+  
   
   if(_metabackground) pages[PG_PLAYER]->addWidget( _metabackground);
   pages[PG_PLAYER]->addWidget(&_meta);
@@ -513,6 +520,9 @@ void Display::_time(bool redraw) {
   }
 #endif
   _clock.draw();
+#if BATTERY_PIN!=255
+  if(_battery) _battery->updateBattery();
+#endif
   /*#ifdef USE_NEXTION
     nextion.printClock(network.timeinfo);
   #endif*/

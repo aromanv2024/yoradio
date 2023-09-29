@@ -55,6 +55,9 @@ class Display {
     BitrateWidget *_fullbitrate;
     FillWidget *_metabackground, *_plbackground;
     SliderWidget *_volbar, *_heapbar;
+    #if BATTERY_PIN!=255
+      BatteryWidget *_battery;
+    #endif
     Pager _pager;
     Page _footer;
     VuWidget *_vuwidget;

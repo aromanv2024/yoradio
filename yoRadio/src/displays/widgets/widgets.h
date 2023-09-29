@@ -3,6 +3,11 @@
 
 #include "Arduino.h"
 #include "../../core/config.h"
+
+#if BATTERY_PIN!=255
+  #include "../../Battery/Battery18650Stats.h"
+#endif
+
 enum WidgetAlign { WA_LEFT, WA_CENTER, WA_RIGHT };
 
 
@@ -63,6 +68,11 @@ struct BitrateConfig {
   uint16_t dimension;
 };
 
+struct BatteryConfig {
+  WidgetConfig widget;
+  uint8_t mode;
+};
+
 class Widget{
   public:
     Widget(){ _active   = false; }
@@ -120,7 +130,7 @@ class TextWidget: public Widget {
     TextWidget(WidgetConfig wconf, uint16_t buffsize, bool uppercase, uint16_t fgcolor, uint16_t bgcolor) { init(wconf, buffsize, uppercase, fgcolor, bgcolor); }
     ~TextWidget();
     void init(WidgetConfig wconf, uint16_t buffsize, bool uppercase, uint16_t fgcolor, uint16_t bgcolor);
-    void setText(const char* txt);
+    void setText(const char* txt, bool rus=true);
     void setText(int val, const char *format);
     void setText(const char* txt, const char *format);
     bool uppercase() { return _uppercase; }
@@ -220,6 +230,33 @@ class NumWidget: public TextWidget {
     void _getBounds();
     void _draw();
 };
+
+#if BATTERY_PIN!=255
+class BatteryWidget: public TextWidget {
+  public:
+    BatteryWidget(){}
+    BatteryWidget(BatteryConfig btconf, uint16_t hcolor, uint16_t mcolor, uint16_t lcolor, uint16_t bgcolor);
+    ~BatteryWidget();
+    void init(BatteryConfig btconf, uint16_t hcolor, uint16_t mcolor, uint16_t lcolor, uint16_t bgcolor);
+    void setVal(uint8_t val);
+    uint8_t getVal() { return _val; }
+    void updateBattery();
+  protected:
+    void _draw();
+    uint32_t _batteryFilter(int battery_Raw);
+    uint8_t _getGlyph(uint8_t val);
+    uint16_t _mcolor, _lcolor, _delay;
+    uint8_t _mode, _val;
+    char _glyphs[5][4] = {
+        "\235\236\237", //0
+        "\235\236\243", //25
+        "\235\241\243", //50
+        "\235\242\243", //75
+        "\240\242\243"  //100
+      };
+    Battery *_battery;
+};
+#endif  // if BATTERY_PIN!=255
 
 class ProgressWidget: public TextWidget {
   public:

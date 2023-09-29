@@ -45,8 +45,11 @@ void TextWidget::init(WidgetConfig wconf, uint16_t buffsize, bool uppercase, uin
   _uppercase = uppercase;
 }
 
-void TextWidget::setText(const char* txt) {
-  strlcpy(_text, dsp.utf8Rus(txt, _uppercase), _buffsize);
+void TextWidget::setText(const char* txt, bool rus) {
+  if(rus)
+    strlcpy(_text, dsp.utf8Rus(txt, _uppercase), _buffsize);
+  else
+    strlcpy(_text, txt, _buffsize);
   _textwidth = strlen(_text) * _charWidth;
   if (strcmp(_oldtext, _text) == 0) return;
   if (_active) dsp.fillRect(_oldleft == 0 ? _realLeft() : min(_oldleft, _realLeft()),  _config.top, max(_oldtextwidth, _textwidth), _textheight, _bgcolor);
@@ -413,6 +416,107 @@ void NumWidget::_draw() {
   strlcpy(_oldtext, _text, _buffsize);
   dsp.setFont();
 }
+
+/************************
+      BATTERY WIDGET
+ ************************/
+
+#if BATTERY_PIN!=255
+BatteryWidget::BatteryWidget(BatteryConfig btconf, uint16_t fgcolor, uint16_t mcolor, uint16_t lcolor, uint16_t bgcolor){
+  init(btconf, fgcolor, mcolor, lcolor, bgcolor);
+}
+
+BatteryWidget::~BatteryWidget() {
+  if(_battery) free(_battery);
+}
+
+void BatteryWidget::init(BatteryConfig btconf, uint16_t fgcolor, uint16_t mcolor, uint16_t lcolor, uint16_t bgcolor){
+  Widget::init(btconf.widget, fgcolor, bgcolor);
+  _mode = btconf.mode;
+  #ifdef DBGBT
+    if(_mode==2)
+      _buffsize = 11;
+    else if(_mode==1)
+      _buffsize = 10;
+    else
+      _buffsize = 14;
+  #else
+    if(_mode==2){ //digits
+      _buffsize = 5;
+    }else if(_mode==1){ //symbols
+      _buffsize = 4;
+    }else{ //both
+      _buffsize = 8;
+    }
+  #endif
+  _charWidth = btconf.widget.textsize * CHARWIDTH;    // default GFX font
+  _textheight = btconf.widget.textsize * CHARHEIGHT;   // default GFX font
+  _text = (char *) malloc(sizeof(char) * _buffsize);
+  memset(_text, 0, _buffsize);
+  _oldtext = (char *) malloc(sizeof(char) * _buffsize);
+  memset(_oldtext, 0, _buffsize);
+  _textwidth = _oldtextwidth = _oldleft = _val = 0;
+  _uppercase = false;
+  _textheight = btconf.widget.textsize;
+  _mcolor = mcolor;
+  _lcolor = lcolor;
+  _delay = BATTERY_DELAY;
+  _battery = new Battery();
+  _battery->init();
+}
+
+void BatteryWidget::_draw() {
+  if(!_active) return;
+  uint16_t fc = _fgcolor;
+  if(_val<70) fc = _mcolor;
+  if(_val<10) fc = _lcolor;
+  dsp.setTextColor(fc, _bgcolor);
+  dsp.setCursor(_realLeft(), _config.top);
+  dsp.setFont();
+  dsp.setTextSize(_config.textsize);
+  dsp.print(_text);
+  strlcpy(_oldtext, _text, _buffsize);
+}
+
+void BatteryWidget::updateBattery(){
+  _delay++;
+  if(_delay<BATTERY_DELAY) return;
+  _delay = 0;
+  if(_battery)
+    setVal(_battery->getBatteryChargeLevel(true));
+}
+
+uint8_t BatteryWidget::_getGlyph(uint8_t val){
+  if(val>85) return 4;
+  if(val>55) return 3;
+  if(val>30) return 2;
+  if(val>10) return 1;
+  return 0;
+}
+
+void BatteryWidget::setVal(uint8_t val){
+  char buf[_buffsize];
+  _val = val;
+  #ifdef DBGBT
+    float mvlt = (_battery)?_battery->getBatteryVolts():0.0;
+    if(_mode==2)
+      snprintf(buf, _buffsize, "%.3f %d%%", mvlt, val);
+    else if(_mode==1)
+      snprintf(buf, _buffsize, "%.3f %s", mvlt, _glyphs[_getGlyph(val)]);
+    else
+      snprintf(buf, _buffsize, "%.3f %s%3d%%", mvlt, _glyphs[_getGlyph(val)], val);
+  #else
+    if(_mode==2){ //digits
+      snprintf(buf, _buffsize, "%d%%", val);
+    }else if(_mode==1){ //symbols
+      snprintf(buf, _buffsize, "%s", _glyphs[_getGlyph(val)]);
+    }else{ //both
+      snprintf(buf, _buffsize, "%s%3d%%", _glyphs[_getGlyph(val)], val);
+    }
+  #endif
+  setText(buf, false);
+}
+#endif  // if BATTERY_PIN!=255
 
 /**************************
       PROGRESS WIDGET

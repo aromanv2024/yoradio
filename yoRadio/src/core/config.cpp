@@ -391,6 +391,10 @@ void Config::loadTheme(){
   theme.playlist[2]   = color565(COLOR_PLAYLIST_2);
   theme.playlist[3]   = color565(COLOR_PLAYLIST_3);
   theme.playlist[4]   = color565(COLOR_PLAYLIST_4);
+  
+  theme.batteryhigh   = color565(COLOR_BATTERY_HIGH);
+  theme.batterymid    = color565(COLOR_BATTERY_MID);
+  theme.batterylow    = color565(COLOR_BATTERY_LOW);
   #include "../displays/tools/tftinverttitle.h"
 }
 

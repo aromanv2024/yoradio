@@ -18,6 +18,7 @@
   #define TITLE_FIX 0
 #endif
 #define bootLogoTop     68
+#define  SHOW_BATTERY
 
 /* SROLLS  */                            /* {{ left, top, fontsize, align }, buffsize, uppercase, width, scrolldelay, scrolldelta, scrolltime } */
 const ScrollConfig metaConf       PROGMEM = {{ TFT_FRAMEWDT, TFT_FRAMEWDT, 3, WA_LEFT }, 140, true, MAX_WIDTH, 5000, 5, 30 };
@@ -38,8 +39,8 @@ const FillConfig  heapbarConf     PROGMEM = {{ 0, 239, 0, WA_LEFT }, DSP_WIDTH, 
 /* WIDGETS  */                           /* { left, top, fontsize, align } */
 const WidgetConfig bootstrConf    PROGMEM = { 0, 182, 1, WA_CENTER };
 const WidgetConfig bitrateConf    PROGMEM = { 70, 191, 1, WA_LEFT };
-const WidgetConfig voltxtConf     PROGMEM = { 0, 214, 1, WA_CENTER };
-const WidgetConfig  iptxtConf     PROGMEM = { TFT_FRAMEWDT, 214, 1, WA_LEFT };
+const WidgetConfig voltxtConf     PROGMEM = { 0, 215, 1, WA_CENTER };
+const WidgetConfig  iptxtConf     PROGMEM = { TFT_FRAMEWDT, 215, 1, WA_LEFT };
 const WidgetConfig   rssiConf     PROGMEM = { TFT_FRAMEWDT, 214-6, 2, WA_RIGHT };
 const WidgetConfig numConf        PROGMEM = { 0, 120+30, 52, WA_CENTER };
 const WidgetConfig apNameConf     PROGMEM = { TFT_FRAMEWDT, 66, 2, WA_CENTER };
@@ -52,6 +53,8 @@ const WidgetConfig vuConf         PROGMEM = { TFT_FRAMEWDT, 100, 1, WA_LEFT };
 const WidgetConfig bootWdtConf    PROGMEM = { 0, 162, 1, WA_CENTER };
 const ProgressConfig bootPrgConf  PROGMEM = { 90, 14, 4 };
 const BitrateConfig fullbitrateConf PROGMEM = {{DSP_WIDTH-TFT_FRAMEWDT-34, 43, 2, WA_LEFT}, 42 };
+                                     /*{{ left,                top, fontsize, align    }, mode (0: both, 1: symbols, 2: percents } */
+const BatteryConfig battConf PROGMEM = {{ TFT_FRAMEWDT+6*5+15, 215, 1,        WA_RIGHT }, 0 };
 
 /* BANDS  */                             /* { onebandwidth, onebandheight, bandsHspace, bandsVspace, numofbands, fadespeed } */
 const VUBandsConfig bandsConf     PROGMEM = { 24, 100, 4, 2, 10, 2 };

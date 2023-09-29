@@ -75,6 +75,9 @@ struct theme_t {
   uint16_t plcurrentbg;
   uint16_t plcurrentfill;
   uint16_t playlist[5];
+  uint16_t batteryhigh;
+  uint16_t batterymid;
+  uint16_t batterylow;
 };
 struct config_t
 {
